@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Algebra Tiles Virtual Lab 5.0</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --line:#d1d5db;
+      --accent:#2563eb;
+      --accent2:#16a34a;
+      --x2:#9fd3ff;
+      --x:#b7e4a8;
+      --one:#fff2a8;
+      --negx2:#f4a6a6;
+      --negx:#f7b0a8;
+      --negone:#ff8a80;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+    }
+
+    header{
+      padding:22px 20px;
+      background:linear-gradient(135deg,#1d4ed8,#0f766e);
+      color:white;
+    }
+
+    header h1{
+      margin:0 0 6px 0;
+      font-size:clamp(1.5rem,3vw,2.4rem);
+    }
+
+    header p{
+      margin:0;
+      opacity:.92;
+      max-width:900px;
+      line-height:1.45;
+    }
+
+    main{
+      max-width:1220px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap:10px;
+      align-items:center;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 6px 20px rgba(15,23,42,.06);
+    }
+
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:1rem;
+    }
+
+    button, select{
+      border:1px solid var(--line);
+      background:white;
+      color:var(--ink);
+      border-radius:12px;
+      padding:11px 13px;
+      font-weight:700;
+      cursor:pointer;
+      font-size:.95rem;
+    }
+
+    button.primary{
+      background:var(--accent);
+      color:white;
+      border-color:var(--accent);
+    }
+
+    button.success{
+      background:var(--accent2);
+      color:white;
+      border-color:var(--accent2);
+    }
+
+    button:hover, select:hover{
+      filter:brightness(.97);
+    }
+
+    .status{
+      margin-top:12px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+    }
+
+    .formula{
+      font-weight:800;
+      font-size:1.05rem;
+    }
+
+    .muted{ color:var(--muted); }
+
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 6px 20px rgba(15,23,42,.05);
+    }
+
+    .panel h2{
+      font-size:1.05rem;
+      margin:0 0 10px 0;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:10px;
+      align-items:center;
+    }
+
+    .hint{
+      font-size:.9rem;
+      color:var(--muted);
+      line-height:1.45;
+      margin:8px 0 0;
+    }
+
+    .workspace, .solution{
+      height:510px;
+      position:relative;
+      overflow:hidden;
+      border:2px dashed #cbd5e1;
+      border-radius:14px;
+      background-color:#fff;
+      background-image:
+        linear-gradient(#edf2f7 1px, transparent 1px),
+        linear-gradient(90deg, #edf2f7 1px, transparent 1px);
+      background-size:28px 28px;
+    }
+
+    .solution{
+      border-style:solid;
+      border-color:#e5e7eb;
+      background-image:none;
+    }
+
+    .tile{
+      position:absolute;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:2px solid #111827;
+      border-radius:8px;
+      font-weight:900;
+      box-shadow:0 2px 6px rgba(0,0,0,.2);
+      user-select:none;
+      cursor:grab;
+      touch-action:none;
+      transition: width .12s ease, height .12s ease, transform .12s ease;
+    }
+
+    .tile:active{ cursor:grabbing; }
+
+    .tile.rotatable::after{
+      content:"↻";
+      position:absolute;
+      right:4px;
+      top:1px;
+      font-size:.8rem;
+      opacity:.7;
+    }
+
+    .cell{
+      position:absolute;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      border:2px solid #111827;
+      border-radius:8px;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .side-label{
+      position:absolute;
+      font-weight:900;
+      font-size:1rem;
+      white-space:nowrap;
+    }
+
+    .solution-message{
+      padding:18px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      background:#eff6ff;
+      color:#1d4ed8;
+      padding:5px 10px;
+      font-size:.85rem;
+      font-weight:800;
+    }
+
+    .legend{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(6, minmax(110px,1fr));
+      gap:8px;
+    }
+
+    .legend-item{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:9px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:.9rem;
+    }
+
+    .swatch{
+      width:24px;height:18px;border:2px solid #111827;border-radius:4px;
+    }
+
+    footer{
+      max-width:1220px;
+      margin:0 auto;
+      padding:10px 18px 24px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    @media (max-width:900px){
+      .controls{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .legend{grid-template-columns:1fr 1fr}
+      .workspace,.solution{height:430px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Algebra Tiles Virtual Lab 5.0</h1>
+  <p>Laboratorio digitale per visualizzare e scomporre polinomi di secondo grado con Algebra Tiles: trascina, ruota le tessere x e poi confronta con il rettangolo soluzione.</p>
+</header>
+
+<main>
+  <section class="controls">
+    <input id="polyInput" value="2*x^2 + 7*x + 3" aria-label="Polinomio" />
+    <button class="primary" id="buildBtn">Crea laboratorio</button>
+    <select id="exampleSelect" aria-label="Esempi">
+      <option value="">Esempi rapidi</option>
+      <option value="x^2 + 5*x + 6">x² + 5x + 6</option>
+      <option value="x^2 + 7*x + 12">x² + 7x + 12</option>
+      <option value="x^2 - 9">x² - 9</option>
+      <option value="x^2 - 5*x + 6">x² - 5x + 6</option>
+      <option value="x^2 + x - 6">x² + x - 6</option>
+      <option value="2*x^2 + 7*x + 3">2x² + 7x + 3</option>
+      <option value="3*x^2 + 11*x + 6">3x² + 11x + 6</option>
+      <option value="6*x^2 + 11*x + 3">6x² + 11x + 3</option>
+      <option value="4*x^2 + 12*x + 9">4x² + 12x + 9</option>
+    </select>
+    <button id="randomBtn">Esercizio casuale</button>
+  </section>
+
+  <section class="status" id="status">
+    <span class="badge">Pronto</span>
+    <span class="muted">Inserisci un polinomio come <strong>2*x^2 + 7*x + 3</strong>. Puoi usare anche <strong>**</strong> al posto di <strong>^</strong>.</span>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>1. Area di lavoro: trascina e ruota</h2>
+      <div class="toolbar">
+        <button id="resetBtn">Riordina tessere</button>
+        <button id="clearBtn">Pulisci area</button>
+      </div>
+      <div class="workspace" id="workspace"></div>
+      <p class="hint"><strong>Doppio click</strong> su una tessera x per ruotarla di 90°. Le tessere si agganciano alla griglia quando vengono rilasciate.</p>
+    </div>
+
+    <div class="panel">
+      <h2>2. Rettangolo/quadrato soluzione</h2>
+      <div class="toolbar">
+        <button class="success" id="showBtn">Mostra soluzione</button>
+        <button id="hideBtn">Nascondi soluzione</button>
+      </div>
+      <div class="solution" id="solution">
+        <div class="solution-message">La soluzione è nascosta. Prima prova a costruire il rettangolo con le tessere.</div>
+      </div>
+      <p class="hint" id="solutionNote">La soluzione compare solo dopo il tentativo degli studenti.</p>
+    </div>
+  </section>
+
+  <section class="legend">
+    <div class="legend-item"><span class="swatch" style="background:var(--x2)"></span> \(x^2\)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--x)"></span> \(x\)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--one)"></span> \(1\)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--negx2)"></span> \(-x^2\)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--negx)"></span> \(-x\)</div>
+    <div class="legend-item"><span class="swatch" style="background:var(--negone)"></span> \(-1\)</div>
+  </section>
+</main>
+
+<footer>
+  <strong>Nota didattica.</strong> Questo strumento è pensato come mediatore visivo-manipolativo: lo studente prova prima a costruire il rettangolo, poi confronta la propria disposizione con la soluzione. La verifica automatica della disposizione non è inclusa in questa versione.
+</footer>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+
+  const workspace = $("workspace");
+  const solution = $("solution");
+  const status = $("status");
+  const note = $("solutionNote");
+
+  let current = null;
+  let tileCounter = 0;
+
+  function gcd(a,b){
+    a = Math.abs(a); b = Math.abs(b);
+    while(b){ const t=b; b=a%b; a=t; }
+    return a;
+  }
+
+  function parsePolynomial(input){
+    let s = input.replace(/\s+/g,"").replace(/\*\*/g,"^");
+    s = s.replace(/-/g,"+-");
+    if(s.startsWith("+")) s = s.slice(1);
+    const parts = s.split("+").filter(Boolean);
+    let a=0,b=0,c=0;
+
+    for(let part of parts){
+      if(part.includes("x^2")){
+        let coef = part.replace("*x^2","").replace("x^2","");
+        if(coef==="" || coef==="+") coef="1";
+        if(coef==="-") coef="-1";
+        a += Number(coef);
+      } else if(part.includes("x")){
+        let coef = part.replace("*x","").replace("x","");
+        if(coef==="" || coef==="+") coef="1";
+        if(coef==="-") coef="-1";
+        b += Number(coef);
+      } else {
+        c += Number(part);
+      }
+    }
+
+    if(!Number.isInteger(a) || !Number.isInteger(b) || !Number.isInteger(c)){
+      throw new Error("Usa solo coefficienti interi.");
+    }
+
+    return {a,b,c};
+  }
+
+  function superscriptPolynomial(a,b,c){
+    const terms = [];
+    if(a !== 0){
+      if(a === 1) terms.push("x²");
+      else if(a === -1) terms.push("-x²");
+      else terms.push(`${a}x²`);
+    }
+    if(b !== 0){
+      const abs = Math.abs(b);
+      const t = abs === 1 ? "x" : `${abs}x`;
+      terms.push((b > 0 && terms.length ? "+ " : b < 0 ? "- " : "") + t);
+    }
+    if(c !== 0){
+      terms.push((c > 0 && terms.length ? "+ " : c < 0 ? "- " : "") + Math.abs(c));
+    }
+    return terms.length ? terms.join(" ") : "0";
+  }
+
+  function divisorsSigned(n){
+    if(n === 0) return [0];
+    const out = [];
+    const N = Math.abs(n);
+    for(let i=1;i<=N;i++){
+      if(N%i===0){ out.push(i,-i); }
+    }
+    return out;
+  }
+
+  function findFactors(a,b,c){
+    // Cerca (p x + q)(r x + s)
+    if(a === 0) return null;
+
+    for(const p of divisorsSigned(a)){
+      if(p === 0 || a%p !== 0) continue;
+      const r = a/p;
+
+      let candidates = [];
+      if(c === 0){
+        const limit = Math.max(Math.abs(a), Math.abs(b), 12);
+        for(let v=-limit; v<=limit; v++){
+          candidates.push([0,v],[v,0]);
+        }
+      }else{
+        for(const q of divisorsSigned(c)){
+          if(q !== 0 && c%q === 0) candidates.push([q,c/q]);
+        }
+      }
+
+      for(const [q,s] of candidates){
+        if(p*r === a && q*s === c && p*s + q*r === b){
+          let P=p,Q=q,R=r,S=s;
+          if(P < 0 && R < 0){ P=-P; Q=-Q; R=-R; S=-S; }
+          return {p:P,q:Q,r:R,s:S};
+        }
+      }
+    }
+    return null;
+  }
+
+  function factorLabel(p,q){
+    let base = "";
+    if(p === 1) base = "x";
+    else if(p === -1) base = "-x";
+    else if(p !== 0) base = `${p}x`;
+    if(q === 0) return base || "0";
+    return `${base}${q>0?"+":""}${q}`;
+  }
+
+  function termXLabel(k){
+    if(k === 1) return "x";
+    if(k === -1) return "-x";
+    return `${k}x`;
+  }
+
+  function tileSpec(kind, sign){
+    if(kind === "x2") return {
+      label: sign>0 ? "x²" : "-x²",
+      w: 86, h: 86,
+      color: sign>0 ? getVar("--x2") : getVar("--negx2"),
+      rotatable:false
+    };
+    if(kind === "x") return {
+      label: sign>0 ? "x" : "-x",
+      w: 86, h: 28,
+      color: sign>0 ? getVar("--x") : getVar("--negx"),
+      rotatable:true
+    };
+    return {
+      label: sign>0 ? "1" : "-1",
+      w: 28, h: 28,
+      color: sign>0 ? getVar("--one") : getVar("--negone"),
+      rotatable:false
+    };
+  }
+
+  function getVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function makeTiles(a,b,c){
+    const tiles = [];
+    function add(kind, count){
+      const sign = count > 0 ? 1 : -1;
+      for(let i=0;i<Math.abs(count);i++){
+        tiles.push({id:`tile_${tileCounter++}`, kind, sign});
+      }
+    }
+    if(a) add("x2",a);
+    if(b) add("x",b);
+    if(c) add("one",c);
+    return tiles;
+  }
+
+  function setStatus(html){
+    status.innerHTML = html;
+  }
+
+  function build(){
+    try{
+      tileCounter = 0;
+      const poly = parsePolynomial($("polyInput").value);
+      const factors = findFactors(poly.a, poly.b, poly.c);
+      current = {poly, factors, tiles: makeTiles(poly.a, poly.b, poly.c)};
+      setStatus(`
+        <span class="badge">Polinomio</span>
+        <span class="formula">${superscriptPolynomial(poly.a,poly.b,poly.c)}</span>
+        <span class="badge">Scomposizione</span>
+        <span class="formula">${factors ? `(${factorLabel(factors.p,factors.q)})(${factorLabel(factors.r,factors.s)})` : "non trovata in fattori lineari interi"}</span>
+      `);
+      layoutTiles();
+      hideSolution();
+    }catch(err){
+      current = null;
+      workspace.innerHTML = "";
+      hideSolution();
+      setStatus(`<span class="badge" style="background:#fee2e2;color:#991b1b">Errore</span><span>${err.message} Prova: <strong>2*x^2 + 7*x + 3</strong></span>`);
+    }
+  }
+
+  function layoutTiles(){
+    workspace.innerHTML = "";
+    if(!current) return;
+    let x=12, y=12, rowH=0;
+    for(const t of current.tiles){
+      const spec = tileSpec(t.kind,t.sign);
+      if(x + spec.w > workspace.clientWidth - 8){
+        x = 12; y += rowH + 10; rowH = 0;
+      }
+      const el = document.createElement("div");
+      el.className = "tile" + (spec.rotatable ? " rotatable" : "");
+      el.textContent = spec.label;
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.width = spec.w + "px";
+      el.style.height = spec.h + "px";
+      el.style.background = spec.color;
+      el.dataset.baseW = spec.w;
+      el.dataset.baseH = spec.h;
+      el.dataset.rotated = "false";
+      el.dataset.rotatable = spec.rotatable ? "true" : "false";
+      workspace.appendChild(el);
+      attachTileHandlers(el);
+      x += spec.w + 8;
+      rowH = Math.max(rowH, spec.h);
+    }
+  }
+
+  function attachTileHandlers(el){
+    let dragged = false;
+    let offsetX = 0, offsetY = 0;
+
+    el.addEventListener("dblclick", (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      rotate(el);
+    });
+
+    el.addEventListener("pointerdown", (e)=>{
+      dragged = true;
+      el.setPointerCapture(e.pointerId);
+      const rect = el.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      el.style.zIndex = 100;
+    });
+
+    el.addEventListener("pointermove", (e)=>{
+      if(!dragged) return;
+      const wr = workspace.getBoundingClientRect();
+      let nx = e.clientX - wr.left - offsetX;
+      let ny = e.clientY - wr.top - offsetY;
+      nx = Math.max(0, Math.min(nx, workspace.clientWidth - el.offsetWidth));
+      ny = Math.max(0, Math.min(ny, workspace.clientHeight - el.offsetHeight));
+      el.style.left = nx + "px";
+      el.style.top = ny + "px";
+    });
+
+    el.addEventListener("pointerup", ()=>{
+      if(!dragged) return;
+      dragged = false;
+      el.style.zIndex = 1;
+      snapTile(el);
+    });
+  }
+
+  function rotate(el){
+    if(el.dataset.rotatable !== "true") return;
+    const rotated = el.dataset.rotated === "true";
+    const bw = Number(el.dataset.baseW);
+    const bh = Number(el.dataset.baseH);
+    const newW = rotated ? bw : bh;
+    const newH = rotated ? bh : bw;
+    el.dataset.rotated = rotated ? "false" : "true";
+    el.style.width = newW + "px";
+    el.style.height = newH + "px";
+    keepInside(el);
+  }
+
+  function snap(v){ return Math.round(v/14)*14; }
+
+  function snapTile(el){
+    let nx = snap(parseFloat(el.style.left));
+    let ny = snap(parseFloat(el.style.top));
+    nx = Math.max(0, Math.min(nx, workspace.clientWidth - el.offsetWidth));
+    ny = Math.max(0, Math.min(ny, workspace.clientHeight - el.offsetHeight));
+    el.style.left = nx + "px";
+    el.style.top = ny + "px";
+  }
+
+  function keepInside(el){
+    let left = parseFloat(el.style.left);
+    let top = parseFloat(el.style.top);
+    left = Math.max(0, Math.min(left, workspace.clientWidth - el.offsetWidth));
+    top = Math.max(0, Math.min(top, workspace.clientHeight - el.offsetHeight));
+    el.style.left = left + "px";
+    el.style.top = top + "px";
+  }
+
+  function clearWorkspace(){
+    workspace.innerHTML = "";
+  }
+
+  function hideSolution(){
+    solution.innerHTML = `<div class="solution-message">La soluzione è nascosta. Prima prova a costruire il rettangolo con le tessere.</div>`;
+    note.textContent = "La soluzione compare solo dopo il tentativo degli studenti.";
+  }
+
+  function addCell(left, top, w, h, text, color){
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.style.left = left+"px";
+    cell.style.top = top+"px";
+    cell.style.width = w+"px";
+    cell.style.height = h+"px";
+    cell.style.background = color;
+    cell.textContent = text;
+    solution.appendChild(cell);
+  }
+
+  function addLabel(left, top, text, rotate=false){
+    const lab = document.createElement("div");
+    lab.className = "side-label";
+    lab.style.left = left+"px";
+    lab.style.top = top+"px";
+    lab.textContent = text;
+    if(rotate) lab.style.transform = "rotate(-90deg)";
+    solution.appendChild(lab);
+  }
+
+  function showSolution(){
+    if(!current) return;
+    const {poly, factors} = current;
+    solution.innerHTML = "";
+
+    if(!factors){
+      solution.innerHTML = `<div class="solution-message">Non ho trovato una scomposizione in fattori lineari interi per questo polinomio. Le tessere restano comunque manipolabili.</div>`;
+      note.textContent = "Prova un trinomio scomponibile, ad esempio 2*x^2 + 7*x + 3.";
+      return;
+    }
+
+    const {p,q,r,s} = factors;
+
+    const XU = 58;
+    const UU = 30;
+
+    const h1 = Math.max(Math.abs(p)*XU, 46);
+    const h2 = q !== 0 ? Math.max(Math.abs(q)*UU, 30) : 0;
+    const w1 = Math.max(Math.abs(r)*XU, 46);
+    const w2 = s !== 0 ? Math.max(Math.abs(s)*UU, 30) : 0;
+
+    const totalW = w1+w2;
+    const totalH = h1+h2;
+    const left = Math.max(70, (solution.clientWidth-totalW)/2);
+    const top = 78;
+
+    const aTerm = p*r;
+    const b1 = p*s;
+    const b2 = q*r;
+    const cTerm = q*s;
+
+    addCell(left, top, w1, h1, aTerm === 1 ? "x²" : `${aTerm}x²`, aTerm>=0 ? getVar("--x2") : getVar("--negx2"));
+
+    if(s !== 0){
+      addCell(left+w1, top, w2, h1, termXLabel(b1), b1>=0 ? getVar("--x") : getVar("--negx"));
+    }
+    if(q !== 0){
+      addCell(left, top+h1, w1, h2, termXLabel(b2), b2>=0 ? getVar("--x") : getVar("--negx"));
+    }
+    if(q !== 0 && s !== 0){
+      addCell(left+w1, top+h1, w2, h2, String(cTerm), cTerm>=0 ? getVar("--one") : getVar("--negone"));
+    }
+
+    addLabel(left + totalW/2 - 35, top - 32, factorLabel(r,s));
+    addLabel(left - 70, top + totalH/2 + 35, factorLabel(p,q), true);
+
+    const expr = superscriptPolynomial(poly.a,poly.b,poly.c);
+    const f1 = factorLabel(p,q);
+    const f2 = factorLabel(r,s);
+
+    const msg = document.createElement("div");
+    msg.className = "solution-message";
+    msg.style.position = "absolute";
+    msg.style.left = "0";
+    msg.style.right = "0";
+    msg.style.bottom = "8px";
+    msg.style.textAlign = "center";
+    msg.innerHTML = `<strong>${expr} = (${f1})(${f2})</strong>`;
+    solution.appendChild(msg);
+
+    note.innerHTML = `Il rettangolo ha lati <strong>${f1}</strong> e <strong>${f2}</strong>. Le tessere x si possono ruotare perché rappresentano la stessa area: x·1 = 1·x.`;
+    if(f1 === f2) note.innerHTML += " In questo caso il rettangolo è un quadrato di binomio.";
+  }
+
+  function randomExercise(){
+    const options = [
+      [1,5,6],[1,7,12],[1,-5,6],[1,1,-6],
+      [2,7,3],[3,11,6],[6,11,3],[4,12,9],
+      [2,5,2],[5,13,6],[3,10,3]
+    ];
+    const [a,b,c] = options[Math.floor(Math.random()*options.length)];
+    $("polyInput").value = superscriptPolynomial(a,b,c).replace(/x²/g,"*x^2").replace(/^1\*x/,"x").replace(/\s/g,"").replace(/\+\-/g,"-");
+    // Normalizza meglio per input
+    $("polyInput").value = `${a}*x^2 ${b>=0?"+":"-"} ${Math.abs(b)}*x ${c>=0?"+":"-"} ${Math.abs(c)}`;
+    build();
+  }
+
+  $("buildBtn").addEventListener("click", build);
+  $("resetBtn").addEventListener("click", layoutTiles);
+  $("clearBtn").addEventListener("click", clearWorkspace);
+  $("showBtn").addEventListener("click", showSolution);
+  $("hideBtn").addEventListener("click", hideSolution);
+  $("randomBtn").addEventListener("click", randomExercise);
+  $("exampleSelect").addEventListener("change", (e)=>{
+    if(e.target.value){
+      $("polyInput").value = e.target.value;
+      build();
+      e.target.value = "";
+    }
+  });
+  $("polyInput").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") build();
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>
