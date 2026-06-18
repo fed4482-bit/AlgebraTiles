@@ -1,760 +1,377 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Algebra Tiles Virtual Lab 5.0</title>
-  <style>
-    :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --ink:#1f2937;
-      --muted:#6b7280;
-      --line:#d1d5db;
-      --accent:#2563eb;
-      --accent2:#16a34a;
-      --x2:#9fd3ff;
-      --x:#b7e4a8;
-      --one:#fff2a8;
-      --negx2:#f4a6a6;
-      --negx:#f7b0a8;
-      --negone:#ff8a80;
-    }
-
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:var(--bg);
-      color:var(--ink);
-    }
-
-    header{
-      padding:22px 20px;
-      background:linear-gradient(135deg,#1d4ed8,#0f766e);
-      color:white;
-    }
-
-    header h1{
-      margin:0 0 6px 0;
-      font-size:clamp(1.5rem,3vw,2.4rem);
-    }
-
-    header p{
-      margin:0;
-      opacity:.92;
-      max-width:900px;
-      line-height:1.45;
-    }
-
-    main{
-      max-width:1220px;
-      margin:0 auto;
-      padding:18px;
-    }
-
-    .controls{
-      display:grid;
-      grid-template-columns: 1fr auto auto auto;
-      gap:10px;
-      align-items:center;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      box-shadow:0 6px 20px rgba(15,23,42,.06);
-    }
-
-    input{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px 14px;
-      font-size:1rem;
-    }
-
-    button, select{
-      border:1px solid var(--line);
-      background:white;
-      color:var(--ink);
-      border-radius:12px;
-      padding:11px 13px;
-      font-weight:700;
-      cursor:pointer;
-      font-size:.95rem;
-    }
-
-    button.primary{
-      background:var(--accent);
-      color:white;
-      border-color:var(--accent);
-    }
-
-    button.success{
-      background:var(--accent2);
-      color:white;
-      border-color:var(--accent2);
-    }
-
-    button:hover, select:hover{
-      filter:brightness(.97);
-    }
-
-    .status{
-      margin-top:12px;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px 14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:14px;
-      align-items:center;
-    }
-
-    .formula{
-      font-weight:800;
-      font-size:1.05rem;
-    }
-
-    .muted{ color:var(--muted); }
-
-    .grid{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-    }
-
-    .panel{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      box-shadow:0 6px 20px rgba(15,23,42,.05);
-    }
-
-    .panel h2{
-      font-size:1.05rem;
-      margin:0 0 10px 0;
-    }
-
-    .toolbar{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:10px;
-      align-items:center;
-    }
-
-    .hint{
-      font-size:.9rem;
-      color:var(--muted);
-      line-height:1.45;
-      margin:8px 0 0;
-    }
-
-    .workspace, .solution{
-      height:510px;
-      position:relative;
-      overflow:hidden;
-      border:2px dashed #cbd5e1;
-      border-radius:14px;
-      background-color:#fff;
-      background-image:
-        linear-gradient(#edf2f7 1px, transparent 1px),
-        linear-gradient(90deg, #edf2f7 1px, transparent 1px);
-      background-size:28px 28px;
-    }
-
-    .solution{
-      border-style:solid;
-      border-color:#e5e7eb;
-      background-image:none;
-    }
-
-    .tile{
-      position:absolute;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:2px solid #111827;
-      border-radius:8px;
-      font-weight:900;
-      box-shadow:0 2px 6px rgba(0,0,0,.2);
-      user-select:none;
-      cursor:grab;
-      touch-action:none;
-      transition: width .12s ease, height .12s ease, transform .12s ease;
-    }
-
-    .tile:active{ cursor:grabbing; }
-
-    .tile.rotatable::after{
-      content:"↻";
-      position:absolute;
-      right:4px;
-      top:1px;
-      font-size:.8rem;
-      opacity:.7;
-    }
-
-    .cell{
-      position:absolute;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      border:2px solid #111827;
-      border-radius:8px;
-      font-weight:900;
-      text-align:center;
-    }
-
-    .side-label{
-      position:absolute;
-      font-weight:900;
-      font-size:1rem;
-      white-space:nowrap;
-    }
-
-    .solution-message{
-      padding:18px;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      border-radius:999px;
-      background:#eff6ff;
-      color:#1d4ed8;
-      padding:5px 10px;
-      font-size:.85rem;
-      font-weight:800;
-    }
-
-    .legend{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: repeat(6, minmax(110px,1fr));
-      gap:8px;
-    }
-
-    .legend-item{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:9px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:.9rem;
-    }
-
-    .swatch{
-      width:24px;height:18px;border:2px solid #111827;border-radius:4px;
-    }
-
-    footer{
-      max-width:1220px;
-      margin:0 auto;
-      padding:10px 18px 24px;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.45;
-    }
-
-    @media (max-width:900px){
-      .controls{grid-template-columns:1fr}
-      .grid{grid-template-columns:1fr}
-      .legend{grid-template-columns:1fr 1fr}
-      .workspace,.solution{height:430px}
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Algebra Tiles Lab — grado 2 completo</title>
+<style>
+:root{
+  --bg:#f5f7fb; --card:#fff; --ink:#1f2937; --muted:#6b7280; --line:#d1d5db;
+  --accent:#2563eb; --success:#16a34a; --warn:#f59e0b; --danger:#dc2626;
+  --x2:#9fd3ff; --x:#b7e4a8; --one:#fff2a8; --nx2:#f4a6a6; --nx:#f7b0a8; --none:#ff8a80;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(135deg,#1d4ed8,#0f766e);color:white;padding:24px 20px}
+header h1{margin:0 0 6px;font-size:clamp(1.6rem,3vw,2.5rem)}
+header p{margin:0;max-width:1050px;opacity:.93;line-height:1.45}
+main{max-width:1280px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 22px rgba(15,23,42,.06);margin-bottom:14px}
+.controls{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center}
+label{font-weight:800}
+input,select,button{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:1rem;background:white}
+button{font-weight:800;cursor:pointer}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)}
+button.success{background:var(--success);color:white;border-color:var(--success)}
+button.warn{background:var(--warn);color:white;border-color:var(--warn)}
+button.danger{background:var(--danger);color:white;border-color:var(--danger)}
+button:hover,select:hover{filter:brightness(.97)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+h2{font-size:1.08rem;margin:0 0 12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.workspace,.solution{height:540px;position:relative;overflow:hidden;border-radius:16px;background:white}
+.workspace{border:2px dashed #cbd5e1;background-image:linear-gradient(#edf2f7 1px,transparent 1px),linear-gradient(90deg,#edf2f7 1px,transparent 1px);background-size:28px 28px}
+.solution{border:1px solid #e5e7eb}
+.empty{padding:18px;color:var(--muted);line-height:1.45}
+.hint{font-size:.92rem;color:var(--muted);line-height:1.45;margin:10px 0 0}
+.tile{position:absolute;display:flex;align-items:center;justify-content:center;border:2px solid #111827;border-radius:8px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.18);cursor:grab;user-select:none;touch-action:none;transition:width .12s,height .12s}
+.tile.rotatable::after{content:"↻";position:absolute;right:4px;top:1px;font-size:.78rem;opacity:.7}
+.cell{position:absolute;display:flex;align-items:center;justify-content:center;border:2px solid #111827;border-radius:8px;font-weight:900;text-align:center}
+.side-label{position:absolute;font-weight:900;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;background:#eff6ff;color:#1d4ed8;font-weight:900;font-size:.88rem;margin:3px}
+.badge.ok{background:#dcfce7;color:#166534}
+.badge.warn{background:#fef3c7;color:#92400e}
+.badge.err{background:#fee2e2;color:#991b1b}
+.step{border-left:4px solid var(--accent);padding:8px 12px;background:#f8fafc;border-radius:10px;margin:8px 0;line-height:1.45}
+.formula{font-weight:900;font-size:1.08rem}
+.legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sw{display:inline-block;width:25px;height:18px;border:2px solid #111827;border-radius:4px;vertical-align:middle;margin-right:6px}
+.sw.x2{background:var(--x2)}.sw.x{background:var(--x)}.sw.one{background:var(--one)}.sw.nx2{background:var(--nx2)}.sw.nx{background:var(--nx)}.sw.none{background:var(--none)}
+.training{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+.checks{display:flex;gap:12px;flex-wrap:wrap}
+.checks label{font-weight:650}
+.answer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.answer-row input{max-width:150px}
+.scoreboard{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.small{color:var(--muted);font-size:.9rem}
+footer{max-width:1280px;margin:0 auto;padding:6px 18px 28px;color:var(--muted);font-size:.9rem}
+@media(max-width:1000px){.controls,.training{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.workspace,.solution{height:470px}}
+</style>
 </head>
 <body>
 <header>
-  <h1>Algebra Tiles Virtual Lab 5.0</h1>
-  <p>Laboratorio digitale per visualizzare e scomporre polinomi di secondo grado con Algebra Tiles: trascina, ruota le tessere x e poi confronta con il rettangolo soluzione.</p>
+  <h1>Algebra Tiles Lab — grado 2 completo</h1>
+  <p>Laboratorio HTML autonomo per polinomi fino al secondo grado: drag & drop, rotazione, coppie zero, generatore casuale, modalità allenamento, soluzione nascosta e verifica simbolica dei fattori.</p>
 </header>
 
 <main>
-  <section class="controls">
-    <input id="polyInput" value="2*x^2 + 7*x + 3" aria-label="Polinomio" />
-    <button class="primary" id="buildBtn">Crea laboratorio</button>
-    <select id="exampleSelect" aria-label="Esempi">
-      <option value="">Esempi rapidi</option>
+  <section class="card controls">
+    <label for="polyInput">Polinomio</label>
+    <input id="polyInput" value="x^2 - 9" />
+    <button class="primary" id="buildBtn">Analizza</button>
+    <select id="exampleSelect">
+      <option value="">Esempi</option>
       <option value="x^2 + 5*x + 6">x² + 5x + 6</option>
-      <option value="x^2 + 7*x + 12">x² + 7x + 12</option>
-      <option value="x^2 - 9">x² - 9</option>
-      <option value="x^2 - 5*x + 6">x² - 5x + 6</option>
-      <option value="x^2 + x - 6">x² + x - 6</option>
       <option value="2*x^2 + 7*x + 3">2x² + 7x + 3</option>
-      <option value="3*x^2 + 11*x + 6">3x² + 11x + 6</option>
-      <option value="6*x^2 + 11*x + 3">6x² + 11x + 3</option>
+      <option value="x^2 - 9">x² − 9</option>
+      <option value="x^2 - 16">x² − 16</option>
+      <option value="x^2 + 6*x + 9">x² + 6x + 9</option>
       <option value="4*x^2 + 12*x + 9">4x² + 12x + 9</option>
+      <option value="x^2 + x - 6">x² + x − 6</option>
     </select>
-    <button id="randomBtn">Esercizio casuale</button>
   </section>
 
-  <section class="status" id="status">
-    <span class="badge">Pronto</span>
-    <span class="muted">Inserisci un polinomio come <strong>2*x^2 + 7*x + 3</strong>. Puoi usare anche <strong>**</strong> al posto di <strong>^</strong>.</span>
+  <section class="card training">
+    <div>
+      <h2>Generatore esercizi</h2>
+      <div class="toolbar">
+        <select id="levelSelect">
+          <option value="base">Livello base</option>
+          <option value="intermedio">Livello intermedio</option>
+          <option value="avanzato">Livello avanzato</option>
+          <option value="misto">Misto</option>
+        </select>
+        <button class="primary" id="randomBtn">Nuovo esercizio casuale</button>
+        <button id="startTrainingBtn">Avvia/azzera allenamento</button>
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" class="cat" value="trinomio" checked> trinomio</label>
+        <label><input type="checkbox" class="cat" value="fattore" checked> fattore comune</label>
+        <label><input type="checkbox" class="cat" value="quadrato" checked> quadrato di binomio</label>
+        <label><input type="checkbox" class="cat" value="diffquad" checked> differenza di quadrati</label>
+      </div>
+      <p class="hint">Seleziona categorie e livello, poi genera un esercizio. La soluzione rimane nascosta finché non la richiedi.</p>
+    </div>
+    <div>
+      <h2>Allenamento e verifica</h2>
+      <div class="scoreboard">
+        <span class="badge">Esercizi: <span id="count">0</span></span>
+        <span class="badge ok">Corretti: <span id="correct">0</span></span>
+        <span class="badge warn">Tentativi: <span id="attempts">0</span></span>
+      </div>
+      <div class="answer-row" style="margin-top:10px">
+        <span>Proponi:</span>
+        <span>(</span><input id="factor1" placeholder="es. x-3"><span>)</span>
+        <span>(</span><input id="factor2" placeholder="es. x+3"><span>)</span>
+        <button class="success" id="checkBtn">Verifica</button>
+      </div>
+      <div id="feedback" class="hint">La verifica controlla la scomposizione simbolica, non la posizione geometrica delle tessere.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>1. Analisi automatica</h2>
+    <div id="analysis"></div>
   </section>
 
   <section class="grid">
-    <div class="panel">
-      <h2>1. Area di lavoro: trascina e ruota</h2>
-      <div class="toolbar">
-        <button id="resetBtn">Riordina tessere</button>
-        <button id="clearBtn">Pulisci area</button>
+    <section class="card">
+      <div class="panel-head">
+        <h2>2. Manipolazione</h2>
+        <div class="toolbar">
+          <button id="resetBtn">Riordina tessere</button>
+          <button id="clearBtn">Pulisci</button>
+        </div>
       </div>
-      <div class="workspace" id="workspace"></div>
-      <p class="hint"><strong>Doppio click</strong> su una tessera x per ruotarla di 90°. Le tessere si agganciano alla griglia quando vengono rilasciate.</p>
-    </div>
+      <div class="toolbar">
+        <button class="warn" id="addZeroXBtn">Aggiungi +x / −x</button>
+        <button class="warn" id="addZeroOneBtn">Aggiungi +1 / −1</button>
+      </div>
+      <div id="workspace" class="workspace"></div>
+      <p class="hint">Trascina le tessere. Doppio click su una tessera \(x\) per ruotarla. Le coppie zero aggiungono area totale nulla.</p>
+    </section>
 
-    <div class="panel">
-      <h2>2. Rettangolo/quadrato soluzione</h2>
-      <div class="toolbar">
-        <button class="success" id="showBtn">Mostra soluzione</button>
-        <button id="hideBtn">Nascondi soluzione</button>
+    <section class="card">
+      <div class="panel-head">
+        <h2>3. Area model e soluzione</h2>
+        <div class="toolbar">
+          <button class="success" id="showSolutionBtn">Mostra soluzione</button>
+          <button id="hideSolutionBtn">Nascondi</button>
+        </div>
       </div>
-      <div class="solution" id="solution">
-        <div class="solution-message">La soluzione è nascosta. Prima prova a costruire il rettangolo con le tessere.</div>
+      <div id="solution" class="solution">
+        <div class="empty">La soluzione è nascosta: prova prima a costruire il rettangolo.</div>
       </div>
-      <p class="hint" id="solutionNote">La soluzione compare solo dopo il tentativo degli studenti.</p>
-    </div>
+      <p class="hint" id="solutionNote">Per la differenza di quadrati usa coppie zero \(+x/-x\).</p>
+    </section>
   </section>
 
-  <section class="legend">
-    <div class="legend-item"><span class="swatch" style="background:var(--x2)"></span> \(x^2\)</div>
-    <div class="legend-item"><span class="swatch" style="background:var(--x)"></span> \(x\)</div>
-    <div class="legend-item"><span class="swatch" style="background:var(--one)"></span> \(1\)</div>
-    <div class="legend-item"><span class="swatch" style="background:var(--negx2)"></span> \(-x^2\)</div>
-    <div class="legend-item"><span class="swatch" style="background:var(--negx)"></span> \(-x\)</div>
-    <div class="legend-item"><span class="swatch" style="background:var(--negone)"></span> \(-1\)</div>
+  <section class="card">
+    <h2>Legenda</h2>
+    <div class="legend">
+      <span><i class="sw x2"></i> \(x^2\)</span>
+      <span><i class="sw x"></i> \(x\)</span>
+      <span><i class="sw one"></i> \(1\)</span>
+      <span><i class="sw nx2"></i> \(-x^2\)</span>
+      <span><i class="sw nx"></i> \(-x\)</span>
+      <span><i class="sw none"></i> \(-1\)</span>
+      <span class="small">Le tessere aggiunte come coppia zero hanno il bordo tratteggiato arancione.</span>
+    </div>
   </section>
 </main>
 
 <footer>
-  <strong>Nota didattica.</strong> Questo strumento è pensato come mediatore visivo-manipolativo: lo studente prova prima a costruire il rettangolo, poi confronta la propria disposizione con la soluzione. La verifica automatica della disposizione non è inclusa in questa versione.
+  Pagina HTML autonoma. Salvala come <strong>index.html</strong> per pubblicarla su GitHub Pages.
 </footer>
 
 <script>
-(function(){
-  const $ = (id) => document.getElementById(id);
-
-  const workspace = $("workspace");
-  const solution = $("solution");
-  const status = $("status");
-  const note = $("solutionNote");
-
-  let current = null;
-  let tileCounter = 0;
-
-  function gcd(a,b){
-    a = Math.abs(a); b = Math.abs(b);
-    while(b){ const t=b; b=a%b; a=t; }
-    return a;
+function parsePolynomial(input){
+  let s = input.replace(/\s+/g,"").replace(/\*\*/g,"^");
+  s = s.replace(/-/g,"+-");
+  if(s.startsWith("+")) s = s.slice(1);
+  const parts = s.split("+").filter(Boolean);
+  const coeff = new Map();
+  for(const raw of parts){
+    let part = raw, power = 0, coefStr = "";
+    if(part.includes("x^")){
+      const split = part.split("x^");
+      coefStr = split[0].replace("*","");
+      power = Number(split[1]);
+    } else if(part.includes("x")){
+      coefStr = part.replace("*x","").replace("x","");
+      power = 1;
+    } else {
+      coefStr = part;
+      power = 0;
+    }
+    if(coefStr==="" || coefStr==="+") coefStr="1";
+    if(coefStr==="-") coefStr="-1";
+    const coef = Number(coefStr);
+    if(!Number.isInteger(coef) || !Number.isInteger(power) || power < 0) throw new Error("Usa coefficienti interi e potenze intere non negative.");
+    coeff.set(power,(coeff.get(power)||0)+coef);
   }
-
-  function parsePolynomial(input){
-    let s = input.replace(/\s+/g,"").replace(/\*\*/g,"^");
-    s = s.replace(/-/g,"+-");
-    if(s.startsWith("+")) s = s.slice(1);
-    const parts = s.split("+").filter(Boolean);
-    let a=0,b=0,c=0;
-
-    for(let part of parts){
-      if(part.includes("x^2")){
-        let coef = part.replace("*x^2","").replace("x^2","");
-        if(coef==="" || coef==="+") coef="1";
-        if(coef==="-") coef="-1";
-        a += Number(coef);
-      } else if(part.includes("x")){
-        let coef = part.replace("*x","").replace("x","");
-        if(coef==="" || coef==="+") coef="1";
-        if(coef==="-") coef="-1";
-        b += Number(coef);
-      } else {
-        c += Number(part);
+  return coeff;
+}
+function coeffAt(map,p){return map.get(p)||0}
+function degree(map){let d=-Infinity;for(const [p,c] of map.entries()) if(c!==0) d=Math.max(d,p);return d===-Infinity?0:d;}
+function polynomialLabel(a,b,c){
+  const parts=[];
+  if(a!==0) parts.push(a===1?"x²":a===-1?"-x²":`${a}x²`);
+  if(b!==0){const abs=Math.abs(b);const t=abs===1?"x":`${abs}x`;parts.push((b>0&&parts.length?"+ ":b<0?"- ":"")+t);}
+  if(c!==0) parts.push((c>0&&parts.length?"+ ":c<0?"- ":"")+Math.abs(c));
+  return parts.length?parts.join(" "):"0";
+}
+function divisorsSigned(n){if(n===0)return[0];const out=[];const N=Math.abs(n);for(let i=1;i<=N;i++)if(N%i===0)out.push(i,-i);return out;}
+function findLinearFactors(a,b,c){
+  if(a===0) return null;
+  for(const p of divisorsSigned(a)){
+    if(p===0 || a%p!==0) continue;
+    const r=a/p;
+    let candidates=[];
+    if(c===0){const limit=Math.max(Math.abs(a),Math.abs(b),12);for(let v=-limit;v<=limit;v++)candidates.push([0,v],[v,0]);}
+    else{for(const q of divisorsSigned(c)) if(q!==0 && c%q===0)candidates.push([q,c/q]);}
+    for(const [q,s] of candidates){
+      if(p*r===a && q*s===c && p*s+q*r===b){
+        let P=p,Q=q,R=r,S=s;
+        if(P<0 && R<0){P=-P;Q=-Q;R=-R;S=-S}
+        return {p:P,q:Q,r:R,s:S};
       }
     }
-
-    if(!Number.isInteger(a) || !Number.isInteger(b) || !Number.isInteger(c)){
-      throw new Error("Usa solo coefficienti interi.");
-    }
-
-    return {a,b,c};
   }
+  return null;
+}
+function factorLabel(p,q){
+  let base="";
+  if(p===1) base="x"; else if(p===-1) base="-x"; else if(p!==0) base=`${p}x`;
+  if(q===0) return base || "0";
+  return `${base}${q>0?"+":""}${q}`;
+}
+function termXLabel(k){if(k===1)return"x";if(k===-1)return"-x";return`${k}x`;}
+function isDifferenceOfSquares(a,b,c){if(a!==1||b!==0||c>=0)return null;const n=Math.sqrt(-c);return Number.isInteger(n)?n:null;}
+function analyze(input){
+  const map=parsePolynomial(input);
+  if(degree(map)>2) return {unsupported:true,message:"Questa versione gestisce solo polinomi fino al secondo grado."};
+  const a=coeffAt(map,2), b=coeffAt(map,1), c=coeffAt(map,0);
+  return {a,b,c,factors:findLinearFactors(a,b,c),diffSq:isDifferenceOfSquares(a,b,c)};
+}
+function parseLinearFactor(str){
+  const m=parsePolynomial(str);
+  if(degree(m)>1) throw new Error("Ogni fattore deve essere lineare.");
+  return {p:coeffAt(m,1),q:coeffAt(m,0)};
+}
+function expandFactors(f1,f2){
+  return {a:f1.p*f2.p,b:f1.p*f2.q+f1.q*f2.p,c:f1.q*f2.q};
+}
 
-  function superscriptPolynomial(a,b,c){
-    const terms = [];
-    if(a !== 0){
-      if(a === 1) terms.push("x²");
-      else if(a === -1) terms.push("-x²");
-      else terms.push(`${a}x²`);
-    }
-    if(b !== 0){
-      const abs = Math.abs(b);
-      const t = abs === 1 ? "x" : `${abs}x`;
-      terms.push((b > 0 && terms.length ? "+ " : b < 0 ? "- " : "") + t);
-    }
-    if(c !== 0){
-      terms.push((c > 0 && terms.length ? "+ " : c < 0 ? "- " : "") + Math.abs(c));
-    }
-    return terms.length ? terms.join(" ") : "0";
+const $=id=>document.getElementById(id);
+const COLORS={x2:getCss("--x2"),x:getCss("--x"),one:getCss("--one"),nx2:getCss("--nx2"),nx:getCss("--nx"),none:getCss("--none")};
+function getCss(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+function tileSpec(kind,sign){
+  if(kind==="x2") return {label:sign>0?"x²":"-x²",w:86,h:86,color:sign>0?COLORS.x2:COLORS.nx2,rotatable:false};
+  if(kind==="x") return {label:sign>0?"x":"-x",w:86,h:28,color:sign>0?COLORS.x:COLORS.nx,rotatable:true};
+  return {label:sign>0?"1":"-1",w:28,h:28,color:sign>0?COLORS.one:COLORS.none,rotatable:false};
+}
+let current=null, tiles=[], tileId=0, score={count:0,correct:0,attempts:0};
+
+function addTiles(kind,count){const sign=count>0?1:-1;for(let i=0;i<Math.abs(count);i++)tiles.push({id:`tile_${tileId++}`,kind,sign});}
+function rebuildTiles(){tiles=[];tileId=0;if(!current||current.unsupported)return;addTiles("x2",current.a);addTiles("x",current.b);addTiles("one",current.c);}
+function addZeroPair(kind){if(!current||current.unsupported)return;if(kind==="x"){tiles.push({id:`tile_${tileId++}`,kind:"x",sign:1,zero:true});tiles.push({id:`tile_${tileId++}`,kind:"x",sign:-1,zero:true});}else{tiles.push({id:`tile_${tileId++}`,kind:"one",sign:1,zero:true});tiles.push({id:`tile_${tileId++}`,kind:"one",sign:-1,zero:true});}renderTiles();}
+function snap(v){return Math.round(v/14)*14}
+function attachTileHandlers(el,workspace){
+  let dragged=false,ox=0,oy=0;
+  el.addEventListener("dblclick",(e)=>{e.preventDefault();if(el.dataset.rotatable==="true")rotateTile(el,workspace)});
+  el.addEventListener("pointerdown",(e)=>{dragged=true;el.setPointerCapture(e.pointerId);const r=el.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;el.style.zIndex=99;});
+  el.addEventListener("pointermove",(e)=>{if(!dragged)return;const wr=workspace.getBoundingClientRect();let nx=e.clientX-wr.left-ox,ny=e.clientY-wr.top-oy;nx=Math.max(0,Math.min(nx,workspace.clientWidth-el.offsetWidth));ny=Math.max(0,Math.min(ny,workspace.clientHeight-el.offsetHeight));el.style.left=nx+"px";el.style.top=ny+"px";});
+  el.addEventListener("pointerup",()=>{if(!dragged)return;dragged=false;el.style.zIndex=1;let nx=snap(parseFloat(el.style.left)),ny=snap(parseFloat(el.style.top));nx=Math.max(0,Math.min(nx,workspace.clientWidth-el.offsetWidth));ny=Math.max(0,Math.min(ny,workspace.clientHeight-el.offsetHeight));el.style.left=nx+"px";el.style.top=ny+"px";});
+}
+function rotateTile(el,workspace){const rotated=el.dataset.rotated==="true";const bw=Number(el.dataset.baseW),bh=Number(el.dataset.baseH);el.dataset.rotated=rotated?"false":"true";el.style.width=(rotated?bw:bh)+"px";el.style.height=(rotated?bh:bw)+"px";}
+function renderTiles(){
+  const workspace=$("workspace");workspace.innerHTML="";
+  let x=12,y=12,rowH=0;
+  for(const t of tiles){
+    const s=tileSpec(t.kind,t.sign);
+    if(x+s.w>workspace.clientWidth-8){x=12;y+=rowH+10;rowH=0}
+    const el=document.createElement("div");
+    el.className="tile"+(s.rotatable?" rotatable":"");el.textContent=s.label;
+    el.style.left=x+"px";el.style.top=y+"px";el.style.width=s.w+"px";el.style.height=s.h+"px";el.style.background=s.color;
+    if(t.zero) el.style.outline="3px dashed #f59e0b";
+    el.dataset.baseW=s.w;el.dataset.baseH=s.h;el.dataset.rotated="false";el.dataset.rotatable=s.rotatable?"true":"false";
+    workspace.appendChild(el);attachTileHandlers(el,workspace);
+    x+=s.w+8;rowH=Math.max(rowH,s.h);
   }
-
-  function divisorsSigned(n){
-    if(n === 0) return [0];
-    const out = [];
-    const N = Math.abs(n);
-    for(let i=1;i<=N;i++){
-      if(N%i===0){ out.push(i,-i); }
-    }
-    return out;
-  }
-
-  function findFactors(a,b,c){
-    // Cerca (p x + q)(r x + s)
-    if(a === 0) return null;
-
-    for(const p of divisorsSigned(a)){
-      if(p === 0 || a%p !== 0) continue;
-      const r = a/p;
-
-      let candidates = [];
-      if(c === 0){
-        const limit = Math.max(Math.abs(a), Math.abs(b), 12);
-        for(let v=-limit; v<=limit; v++){
-          candidates.push([0,v],[v,0]);
-        }
-      }else{
-        for(const q of divisorsSigned(c)){
-          if(q !== 0 && c%q === 0) candidates.push([q,c/q]);
-        }
-      }
-
-      for(const [q,s] of candidates){
-        if(p*r === a && q*s === c && p*s + q*r === b){
-          let P=p,Q=q,R=r,S=s;
-          if(P < 0 && R < 0){ P=-P; Q=-Q; R=-R; S=-S; }
-          return {p:P,q:Q,r:R,s:S};
-        }
-      }
-    }
-    return null;
-  }
-
-  function factorLabel(p,q){
-    let base = "";
-    if(p === 1) base = "x";
-    else if(p === -1) base = "-x";
-    else if(p !== 0) base = `${p}x`;
-    if(q === 0) return base || "0";
-    return `${base}${q>0?"+":""}${q}`;
-  }
-
-  function termXLabel(k){
-    if(k === 1) return "x";
-    if(k === -1) return "-x";
-    return `${k}x`;
-  }
-
-  function tileSpec(kind, sign){
-    if(kind === "x2") return {
-      label: sign>0 ? "x²" : "-x²",
-      w: 86, h: 86,
-      color: sign>0 ? getVar("--x2") : getVar("--negx2"),
-      rotatable:false
-    };
-    if(kind === "x") return {
-      label: sign>0 ? "x" : "-x",
-      w: 86, h: 28,
-      color: sign>0 ? getVar("--x") : getVar("--negx"),
-      rotatable:true
-    };
-    return {
-      label: sign>0 ? "1" : "-1",
-      w: 28, h: 28,
-      color: sign>0 ? getVar("--one") : getVar("--negone"),
-      rotatable:false
-    };
-  }
-
-  function getVar(name){
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function makeTiles(a,b,c){
-    const tiles = [];
-    function add(kind, count){
-      const sign = count > 0 ? 1 : -1;
-      for(let i=0;i<Math.abs(count);i++){
-        tiles.push({id:`tile_${tileCounter++}`, kind, sign});
-      }
-    }
-    if(a) add("x2",a);
-    if(b) add("x",b);
-    if(c) add("one",c);
-    return tiles;
-  }
-
-  function setStatus(html){
-    status.innerHTML = html;
-  }
-
-  function build(){
-    try{
-      tileCounter = 0;
-      const poly = parsePolynomial($("polyInput").value);
-      const factors = findFactors(poly.a, poly.b, poly.c);
-      current = {poly, factors, tiles: makeTiles(poly.a, poly.b, poly.c)};
-      setStatus(`
-        <span class="badge">Polinomio</span>
-        <span class="formula">${superscriptPolynomial(poly.a,poly.b,poly.c)}</span>
-        <span class="badge">Scomposizione</span>
-        <span class="formula">${factors ? `(${factorLabel(factors.p,factors.q)})(${factorLabel(factors.r,factors.s)})` : "non trovata in fattori lineari interi"}</span>
-      `);
-      layoutTiles();
-      hideSolution();
-    }catch(err){
-      current = null;
-      workspace.innerHTML = "";
-      hideSolution();
-      setStatus(`<span class="badge" style="background:#fee2e2;color:#991b1b">Errore</span><span>${err.message} Prova: <strong>2*x^2 + 7*x + 3</strong></span>`);
-    }
-  }
-
-  function layoutTiles(){
-    workspace.innerHTML = "";
-    if(!current) return;
-    let x=12, y=12, rowH=0;
-    for(const t of current.tiles){
-      const spec = tileSpec(t.kind,t.sign);
-      if(x + spec.w > workspace.clientWidth - 8){
-        x = 12; y += rowH + 10; rowH = 0;
-      }
-      const el = document.createElement("div");
-      el.className = "tile" + (spec.rotatable ? " rotatable" : "");
-      el.textContent = spec.label;
-      el.style.left = x + "px";
-      el.style.top = y + "px";
-      el.style.width = spec.w + "px";
-      el.style.height = spec.h + "px";
-      el.style.background = spec.color;
-      el.dataset.baseW = spec.w;
-      el.dataset.baseH = spec.h;
-      el.dataset.rotated = "false";
-      el.dataset.rotatable = spec.rotatable ? "true" : "false";
-      workspace.appendChild(el);
-      attachTileHandlers(el);
-      x += spec.w + 8;
-      rowH = Math.max(rowH, spec.h);
-    }
-  }
-
-  function attachTileHandlers(el){
-    let dragged = false;
-    let offsetX = 0, offsetY = 0;
-
-    el.addEventListener("dblclick", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      rotate(el);
-    });
-
-    el.addEventListener("pointerdown", (e)=>{
-      dragged = true;
-      el.setPointerCapture(e.pointerId);
-      const rect = el.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
-      el.style.zIndex = 100;
-    });
-
-    el.addEventListener("pointermove", (e)=>{
-      if(!dragged) return;
-      const wr = workspace.getBoundingClientRect();
-      let nx = e.clientX - wr.left - offsetX;
-      let ny = e.clientY - wr.top - offsetY;
-      nx = Math.max(0, Math.min(nx, workspace.clientWidth - el.offsetWidth));
-      ny = Math.max(0, Math.min(ny, workspace.clientHeight - el.offsetHeight));
-      el.style.left = nx + "px";
-      el.style.top = ny + "px";
-    });
-
-    el.addEventListener("pointerup", ()=>{
-      if(!dragged) return;
-      dragged = false;
-      el.style.zIndex = 1;
-      snapTile(el);
-    });
-  }
-
-  function rotate(el){
-    if(el.dataset.rotatable !== "true") return;
-    const rotated = el.dataset.rotated === "true";
-    const bw = Number(el.dataset.baseW);
-    const bh = Number(el.dataset.baseH);
-    const newW = rotated ? bw : bh;
-    const newH = rotated ? bh : bw;
-    el.dataset.rotated = rotated ? "false" : "true";
-    el.style.width = newW + "px";
-    el.style.height = newH + "px";
-    keepInside(el);
-  }
-
-  function snap(v){ return Math.round(v/14)*14; }
-
-  function snapTile(el){
-    let nx = snap(parseFloat(el.style.left));
-    let ny = snap(parseFloat(el.style.top));
-    nx = Math.max(0, Math.min(nx, workspace.clientWidth - el.offsetWidth));
-    ny = Math.max(0, Math.min(ny, workspace.clientHeight - el.offsetHeight));
-    el.style.left = nx + "px";
-    el.style.top = ny + "px";
-  }
-
-  function keepInside(el){
-    let left = parseFloat(el.style.left);
-    let top = parseFloat(el.style.top);
-    left = Math.max(0, Math.min(left, workspace.clientWidth - el.offsetWidth));
-    top = Math.max(0, Math.min(top, workspace.clientHeight - el.offsetHeight));
-    el.style.left = left + "px";
-    el.style.top = top + "px";
-  }
-
-  function clearWorkspace(){
-    workspace.innerHTML = "";
-  }
-
-  function hideSolution(){
-    solution.innerHTML = `<div class="solution-message">La soluzione è nascosta. Prima prova a costruire il rettangolo con le tessere.</div>`;
-    note.textContent = "La soluzione compare solo dopo il tentativo degli studenti.";
-  }
-
-  function addCell(left, top, w, h, text, color){
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.style.left = left+"px";
-    cell.style.top = top+"px";
-    cell.style.width = w+"px";
-    cell.style.height = h+"px";
-    cell.style.background = color;
-    cell.textContent = text;
-    solution.appendChild(cell);
-  }
-
-  function addLabel(left, top, text, rotate=false){
-    const lab = document.createElement("div");
-    lab.className = "side-label";
-    lab.style.left = left+"px";
-    lab.style.top = top+"px";
-    lab.textContent = text;
-    if(rotate) lab.style.transform = "rotate(-90deg)";
-    solution.appendChild(lab);
-  }
-
-  function showSolution(){
-    if(!current) return;
-    const {poly, factors} = current;
-    solution.innerHTML = "";
-
-    if(!factors){
-      solution.innerHTML = `<div class="solution-message">Non ho trovato una scomposizione in fattori lineari interi per questo polinomio. Le tessere restano comunque manipolabili.</div>`;
-      note.textContent = "Prova un trinomio scomponibile, ad esempio 2*x^2 + 7*x + 3.";
-      return;
-    }
-
-    const {p,q,r,s} = factors;
-
-    const XU = 58;
-    const UU = 30;
-
-    const h1 = Math.max(Math.abs(p)*XU, 46);
-    const h2 = q !== 0 ? Math.max(Math.abs(q)*UU, 30) : 0;
-    const w1 = Math.max(Math.abs(r)*XU, 46);
-    const w2 = s !== 0 ? Math.max(Math.abs(s)*UU, 30) : 0;
-
-    const totalW = w1+w2;
-    const totalH = h1+h2;
-    const left = Math.max(70, (solution.clientWidth-totalW)/2);
-    const top = 78;
-
-    const aTerm = p*r;
-    const b1 = p*s;
-    const b2 = q*r;
-    const cTerm = q*s;
-
-    addCell(left, top, w1, h1, aTerm === 1 ? "x²" : `${aTerm}x²`, aTerm>=0 ? getVar("--x2") : getVar("--negx2"));
-
-    if(s !== 0){
-      addCell(left+w1, top, w2, h1, termXLabel(b1), b1>=0 ? getVar("--x") : getVar("--negx"));
-    }
-    if(q !== 0){
-      addCell(left, top+h1, w1, h2, termXLabel(b2), b2>=0 ? getVar("--x") : getVar("--negx"));
-    }
-    if(q !== 0 && s !== 0){
-      addCell(left+w1, top+h1, w2, h2, String(cTerm), cTerm>=0 ? getVar("--one") : getVar("--negone"));
-    }
-
-    addLabel(left + totalW/2 - 35, top - 32, factorLabel(r,s));
-    addLabel(left - 70, top + totalH/2 + 35, factorLabel(p,q), true);
-
-    const expr = superscriptPolynomial(poly.a,poly.b,poly.c);
-    const f1 = factorLabel(p,q);
-    const f2 = factorLabel(r,s);
-
-    const msg = document.createElement("div");
-    msg.className = "solution-message";
-    msg.style.position = "absolute";
-    msg.style.left = "0";
-    msg.style.right = "0";
-    msg.style.bottom = "8px";
-    msg.style.textAlign = "center";
-    msg.innerHTML = `<strong>${expr} = (${f1})(${f2})</strong>`;
-    solution.appendChild(msg);
-
-    note.innerHTML = `Il rettangolo ha lati <strong>${f1}</strong> e <strong>${f2}</strong>. Le tessere x si possono ruotare perché rappresentano la stessa area: x·1 = 1·x.`;
-    if(f1 === f2) note.innerHTML += " In questo caso il rettangolo è un quadrato di binomio.";
-  }
-
-  function randomExercise(){
-    const options = [
-      [1,5,6],[1,7,12],[1,-5,6],[1,1,-6],
-      [2,7,3],[3,11,6],[6,11,3],[4,12,9],
-      [2,5,2],[5,13,6],[3,10,3]
-    ];
-    const [a,b,c] = options[Math.floor(Math.random()*options.length)];
-    $("polyInput").value = superscriptPolynomial(a,b,c).replace(/x²/g,"*x^2").replace(/^1\*x/,"x").replace(/\s/g,"").replace(/\+\-/g,"-");
-    // Normalizza meglio per input
-    $("polyInput").value = `${a}*x^2 ${b>=0?"+":"-"} ${Math.abs(b)}*x ${c>=0?"+":"-"} ${Math.abs(c)}`;
-    build();
-  }
-
-  $("buildBtn").addEventListener("click", build);
-  $("resetBtn").addEventListener("click", layoutTiles);
-  $("clearBtn").addEventListener("click", clearWorkspace);
-  $("showBtn").addEventListener("click", showSolution);
-  $("hideBtn").addEventListener("click", hideSolution);
-  $("randomBtn").addEventListener("click", randomExercise);
-  $("exampleSelect").addEventListener("change", (e)=>{
-    if(e.target.value){
-      $("polyInput").value = e.target.value;
-      build();
-      e.target.value = "";
-    }
-  });
-  $("polyInput").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter") build();
-  });
-
-  build();
-})();
+}
+function addCell(parent,left,top,w,h,text,color){const cell=document.createElement("div");cell.className="cell";cell.style.left=left+"px";cell.style.top=top+"px";cell.style.width=w+"px";cell.style.height=h+"px";cell.style.background=color;cell.textContent=text;parent.appendChild(cell);}
+function addLabel(parent,left,top,text,rotate=false){const lab=document.createElement("div");lab.className="side-label";lab.style.left=left+"px";lab.style.top=top+"px";lab.textContent=text;if(rotate)lab.style.transform="rotate(-90deg)";parent.appendChild(lab);}
+function renderSolution(){
+  const solution=$("solution");solution.innerHTML="";
+  if(!current||current.unsupported){solution.innerHTML='<div class="empty">Nessuna soluzione disponibile.</div>';return;}
+  if(!current.factors){solution.innerHTML='<div class="empty">Non ho trovato una scomposizione in fattori lineari interi.</div>';return;}
+  const {p,q,r,s}=current.factors;
+  const XU=58,UU=30,h1=Math.max(Math.abs(p)*XU,46),h2=q!==0?Math.max(Math.abs(q)*UU,30):0,w1=Math.max(Math.abs(r)*XU,46),w2=s!==0?Math.max(Math.abs(s)*UU,30):0;
+  const totalW=w1+w2,totalH=h1+h2,left=Math.max(70,(solution.clientWidth-totalW)/2),top=85;
+  const aTerm=p*r,b1=p*s,b2=q*r,cTerm=q*s;
+  addCell(solution,left,top,w1,h1,aTerm===1?"x²":`${aTerm}x²`,aTerm>=0?COLORS.x2:COLORS.nx2);
+  if(s!==0)addCell(solution,left+w1,top,w2,h1,termXLabel(b1),b1>=0?COLORS.x:COLORS.nx);
+  if(q!==0)addCell(solution,left,top+h1,w1,h2,termXLabel(b2),b2>=0?COLORS.x:COLORS.nx);
+  if(q!==0&&s!==0)addCell(solution,left+w1,top+h1,w2,h2,String(cTerm),cTerm>=0?COLORS.one:COLORS.none);
+  addLabel(solution,left+totalW/2-35,top-32,factorLabel(r,s));
+  addLabel(solution,left-70,top+totalH/2+35,factorLabel(p,q),true);
+  const f1=factorLabel(p,q),f2=factorLabel(r,s);
+  const msg=document.createElement("div");msg.className="empty";msg.style.position="absolute";msg.style.left="0";msg.style.right="0";msg.style.bottom="5px";msg.style.textAlign="center";
+  msg.innerHTML=`<strong>${polynomialLabel(current.a,current.b,current.c)} = (${f1})(${f2})</strong>`;
+  if(current.diffSq) msg.innerHTML+=`<br><span>Per manipolarlo aggiungi ${current.diffSq} coppie zero +x/−x: compaiono +${current.diffSq}x e −${current.diffSq}x.</span>`;
+  solution.appendChild(msg);
+}
+function hideSolution(){$("solution").innerHTML='<div class="empty">La soluzione è nascosta: prova prima a costruire il rettangolo.</div>';}
+function renderAnalysis(){
+  const a=current,box=$("analysis");
+  if(!a||a.unsupported){box.innerHTML=`<span class="badge err">Errore</span> ${a?.message||""}`;return;}
+  let html=`<div><span class="badge">Polinomio</span> <span class="formula">${polynomialLabel(a.a,a.b,a.c)}</span></div>`;
+  if(a.diffSq) html+=`<div class="step"><strong>Differenza di quadrati:</strong> riconosco ${polynomialLabel(a.a,a.b,a.c)} = (x-${a.diffSq})(x+${a.diffSq}). Per costruirlo puoi aggiungere coppie zero \(+x/-x\).</div>`;
+  else html+=`<div class="step"><strong>Area model:</strong> prova a costruire un rettangolo con le tessere disponibili.</div>`;
+  if(a.factors) html+=`<div><span class="badge ok">Scomposizione</span> <span class="formula">(${factorLabel(a.factors.p,a.factors.q)})(${factorLabel(a.factors.r,a.factors.s)})</span></div>`;
+  box.innerHTML=html;
+}
+function build(increment=false){
+  try{current=analyze($("polyInput").value);if(increment)score.count++;rebuildTiles();renderAnalysis();renderTiles();hideSolution();$("factor1").value="";$("factor2").value="";$("feedback").textContent="Soluzione nascosta: prova prima con le tessere o inserisci i fattori.";}
+  catch(e){current={unsupported:true,message:e.message};tiles=[];renderAnalysis();renderTiles();hideSolution();}
+  updateScore();
+}
+const exerciseBank=[
+ {cat:"trinomio",level:"base",p:"x^2 + 5*x + 6"},{cat:"trinomio",level:"base",p:"x^2 + 7*x + 10"},{cat:"trinomio",level:"base",p:"x^2 + x - 6"},{cat:"trinomio",level:"base",p:"x^2 - 5*x + 6"},
+ {cat:"fattore",level:"base",p:"2*x^2 + 4*x"},{cat:"fattore",level:"base",p:"3*x^2 + 6*x"},{cat:"fattore",level:"intermedio",p:"4*x^2 - 8*x"},
+ {cat:"trinomio",level:"intermedio",p:"2*x^2 + 7*x + 3"},{cat:"trinomio",level:"intermedio",p:"3*x^2 + 11*x + 6"},{cat:"trinomio",level:"avanzato",p:"6*x^2 + 11*x + 3"},
+ {cat:"quadrato",level:"base",p:"x^2 + 6*x + 9"},{cat:"quadrato",level:"intermedio",p:"x^2 - 10*x + 25"},{cat:"quadrato",level:"avanzato",p:"4*x^2 + 12*x + 9"},
+ {cat:"diffquad",level:"base",p:"x^2 - 4"},{cat:"diffquad",level:"base",p:"x^2 - 9"},{cat:"diffquad",level:"intermedio",p:"x^2 - 16"},{cat:"diffquad",level:"avanzato",p:"4*x^2 - 25"},{cat:"diffquad",level:"avanzato",p:"9*x^2 - 1"}
+];
+function selectedCats(){return Array.from(document.querySelectorAll(".cat:checked")).map(x=>x.value);}
+function randomExercise(){
+  const cats=selectedCats(), level=$("levelSelect").value;
+  let bank=exerciseBank.filter(e=>cats.includes(e.cat)&&(level==="misto"||e.level===level));
+  if(!bank.length) bank=exerciseBank.filter(e=>cats.includes(e.cat));
+  if(!bank.length){$("feedback").innerHTML='<span class="badge err">Seleziona almeno una categoria.</span>';return;}
+  const e=bank[Math.floor(Math.random()*bank.length)];
+  $("polyInput").value=e.p;
+  build(true);
+}
+function checkAnswer(){
+  if(!current||current.unsupported)return;
+  score.attempts++;
+  try{
+    const f1=parseLinearFactor($("factor1").value);
+    const f2=parseLinearFactor($("factor2").value);
+    const exp=expandFactors(f1,f2);
+    const ok=exp.a===current.a && exp.b===current.b && exp.c===current.c;
+    if(ok){score.correct++;$("feedback").innerHTML='<span class="badge ok">Corretto!</span> La scomposizione proposta genera il polinomio.';}
+    else $("feedback").innerHTML=`<span class="badge err">Non ancora.</span> Il prodotto dà ${polynomialLabel(exp.a,exp.b,exp.c)}.`;
+  }catch(e){$("feedback").innerHTML=`<span class="badge err">Formato non valido.</span> Scrivi fattori come x-3, x+3, 2*x+1.`;}
+  updateScore();
+}
+function updateScore(){$("count").textContent=score.count;$("correct").textContent=score.correct;$("attempts").textContent=score.attempts;}
+$("buildBtn").addEventListener("click",()=>build(false));
+$("resetBtn").addEventListener("click",()=>{rebuildTiles();renderTiles();});
+$("clearBtn").addEventListener("click",()=>{$("workspace").innerHTML="";});
+$("addZeroXBtn").addEventListener("click",()=>addZeroPair("x"));
+$("addZeroOneBtn").addEventListener("click",()=>addZeroPair("one"));
+$("showSolutionBtn").addEventListener("click",renderSolution);
+$("hideSolutionBtn").addEventListener("click",hideSolution);
+$("randomBtn").addEventListener("click",randomExercise);
+$("startTrainingBtn").addEventListener("click",()=>{score={count:0,correct:0,attempts:0};updateScore();randomExercise();});
+$("checkBtn").addEventListener("click",checkAnswer);
+$("exampleSelect").addEventListener("change",e=>{if(e.target.value){$("polyInput").value=e.target.value;e.target.value="";build(false);}});
+$("polyInput").addEventListener("keydown",e=>{if(e.key==="Enter")build(false);});
+build(false);
 </script>
 </body>
 </html>
